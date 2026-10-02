@@ -16,7 +16,12 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
+
+      - name: Install Android Build Tools
+        run: |
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "build-tools;34.0.0"
+          echo "$ANDROID_HOME/build-tools/34.0.0" >> "$GITHUB_PATH"
 
       - uses: gradle/actions/setup-gradle@v4
         with:
