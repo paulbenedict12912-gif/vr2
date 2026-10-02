@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Hand Scanner VR</string>
+    <string name="accessibility_description">Allows Hand Scanner VR to simulate screen taps when you pinch your fingers, so you can click in Roblox VR without touching the screen.</string>
+</resources>
