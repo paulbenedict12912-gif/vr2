@@ -164,8 +164,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(root)
     }
 
-    // ------------------------------------------------------------- model
-
     private fun setupModel(): Boolean {
         landmarker = try {
             createLandmarker(BaseOptions.Delegate.GPU)
@@ -196,8 +194,6 @@ class MainActivity : AppCompatActivity() {
 
         return HandLandmarker.createFromOptions(this, options)
     }
-
-    // ------------------------------------------------------------- camera
 
     private fun startCamera() {
         val future = ProcessCameraProvider.getInstance(this)
@@ -262,8 +258,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // -------------------------------------------------- accessibility
-
     private fun openAccessibilitySettings() {
         Toast.makeText(this, "Find 'Hand Scanner VR Clicker' and turn it ON", Toast.LENGTH_LONG).show()
         startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
@@ -289,10 +283,6 @@ class MainActivity : AppCompatActivity() {
     }
 }
 
-/* ================================================================== *
- *  Accessibility Service — actually performs the screen tap
- * ================================================================== */
-
 class HandAccessibilityService : AccessibilityService() {
 
     companion object {
@@ -301,13 +291,13 @@ class HandAccessibilityService : AccessibilityService() {
 
         fun clickAt(x: Float, y: Float) {
             val now = System.currentTimeMillis()
-            if (now - lastClickTime < 400) return  // debounce
+            if (now - lastClickTime < 400) return
             lastClickTime = now
 
             val svc = instance ?: return
             val path = Path().apply { moveTo(x, y) }
             val gesture = GestureDescription.Builder()
-                .addStroke(GestureDescription.StrokeDescription(path, 0, 60))
+                .addStroke(GestureDescription.StrokeDescription(path, 0L, 60L))
                 .build()
             svc.dispatchGesture(gesture, null, null)
         }
@@ -327,10 +317,6 @@ class HandAccessibilityService : AccessibilityService() {
         if (instance == this) instance = null
     }
 }
-
-/* ================================================================== *
- *  Overlay Service — draws the skeleton on top of any app
- * ================================================================== */
 
 class OverlayService : android.app.Service() {
 
@@ -370,10 +356,6 @@ class OverlayService : android.app.Service() {
         overlayView = null
     }
 }
-
-/* ================================================================== *
- *  Overlay view — draws the glowing hand skeleton + triggers clicks
- * ================================================================== */
 
 class HandOverlayView(context: Context) : View(context) {
 
@@ -477,25 +459,21 @@ class HandOverlayView(context: Context) : View(context) {
             for (i in FINGERTIPS)
                 canvas.drawCircle(xs[i], ys[i], jointR * 2.8f * pulse, ring)
 
-            // ---- cursor: follow index fingertip (landmark 8) ----
             val cursorX = xs[8]
             val cursorY = ys[8]
             canvas.drawCircle(cursorX, cursorY, 18f, cursorPaint)
             canvas.drawCircle(cursorX, cursorY, 4f, cursorPaint)
 
-            // ---- pinch detection: distance between thumb tip (4) and index tip (8) ----
             val dx = xs[4] - xs[8]
             val dy = ys[4] - ys[8]
             val dist = hypot(dx, dy)
-            val pinchNow = dist < 60f  // threshold in screen pixels
+            val pinchNow = dist < 60f
 
             if (pinchNow && !lastPinchState) {
-                // Fire a click at the cursor position
                 HandAccessibilityService.clickAt(cursorX, cursorY)
             }
             lastPinchState = pinchNow
 
-            // ---- targeting brackets ----
             var minX = Float.MAX_VALUE; var minY = Float.MAX_VALUE
             var maxX = -Float.MAX_VALUE; var maxY = -Float.MAX_VALUE
             for (i in 0 until 21) {
